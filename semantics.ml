@@ -73,4 +73,9 @@ let rec lookup_env (env:env) (x:variable) : value option =
 	| (var,value)  :: tl -> print_endline (var) 
 
 
+(*
+let update env (env:env) (x:variable) (v: value) : env = failwith ”unimplemented”
+let rec eval (env: env) (e: expr) : value option = failwith ”unimplemented”
+*)
+
 
