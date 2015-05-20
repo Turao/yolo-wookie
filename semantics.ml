@@ -56,3 +56,21 @@ and
 (* ambiente vazio *)
 let empty env : env = [ ]
 
+
+
+(* 
+	busca no ambiente :
+	
+		lookup_env env x == Some v
+		(x,v) é o par contendo x adicionando mais recentemente a env 
+		lookup_env env x == None, se env não possui par com x 
+
+*)
+
+let rec lookup_env (env:env) (x:variable) : value option = 
+	match env with
+	[] -> None
+	| (var,value)  :: tl -> print_endline (var) 
+
+
+
