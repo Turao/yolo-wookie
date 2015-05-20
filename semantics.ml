@@ -5,34 +5,6 @@ Alunos:
 	Arthur Lenz
 	Rafael Valer *)
 
-(* L1 Types *)
-(* type types = T_Natural | T_Bool | T_Function of types * types *)
-
-(*
-type term = 
-					(* L0 Abstract Grammar *)
-						TmTrue
-					| TmFalse
-					| TmIf of term * term * term
-					| TmZero
-					| TmSucc
-					| TmPred
-					| TmIsZero
-					(* extending to L1 Abstract Grammar *)
-					(*| e1 op e2*) 
-					| TmApp of term * term
-					| TmVar of string
-					| TmFun of string * term * term
-					| TmLet of term * term * term
-
-type value = 
-						(* L1 values *)
-						  ValBool
-						| ValNatural
-						| ValClosure
-					*)
-
-
 type variable = string
 
 type operator =
@@ -69,13 +41,24 @@ let empty env : env = [ ]
 
 let rec lookup_env (env:env) (x:variable) : value option = 
 	match env with
-	[] -> None
-	| (var,value)  :: tl -> print_endline (var) 
+	| [] -> None
+	| (var,value)  :: tl -> 
+		if compare var x == 0 then 
+			Some value 
+		else 
+			lookup_env tl x;; 
 
+let x : value = Vnum 10;;
+let y : value = Vnum 12;;
+let z : value = Vnum 9;;
+
+let environment : env = [ ("y", y);("x", x);("z", z) ];;
+
+let result = lookup_env environment "z";;
+
+result;;
 
 (*
 let update env (env:env) (x:variable) (v: value) : env = failwith ”unimplemented”
 let rec eval (env: env) (e: expr) : value option = failwith ”unimplemented”
 *)
-
-
