@@ -30,7 +30,7 @@ let empty env : env = [ ]
 
 
 
-(* 
+(*
 	busca no ambiente :
 	
 		lookup_env env x == Some v
@@ -48,17 +48,32 @@ let rec lookup_env (env:env) (x:variable) : value option =
 		else 
 			lookup_env tl x;; 
 
+
+(* atualização do ambiente :
+update env x v retorna um novo env contendo o par (x,v) *)
+
+let update_env (env:env) (x:variable) (v: value) : env = 
+	(x , v)::env 
+
+
+
+
+(*---------------------TESTS----------------------*)	
+
+
 let x : value = Vnum 10;;
 let y : value = Vnum 12;;
 let z : value = Vnum 9;;
+let k : value = Vbool true;;
 
 let environment : env = [ ("y", y);("x", x);("z", z) ];;
+let env1 = update_env environment "karakarambakarakarao" k
 
 let result = lookup_env environment "z";;
 
-result;;
+env1;;
+
+
 
 (*
-let update env (env:env) (x:variable) (v: value) : env = failwith ”unimplemented”
-let rec eval (env: env) (e: expr) : value option = failwith ”unimplemented”
-*)
+let rec eval (env: env) (e: expr) : value option = failwith ”unimplemented”*)
