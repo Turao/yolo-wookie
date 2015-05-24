@@ -78,12 +78,14 @@ env1;;
 
 let rec eval (env: env) (e: expr) : value option =
 	match e with	
-	| Num e -> Some (Vnum e);;
-	
+	| Num e -> Some (Vnum e)
+	| Bool e -> Some (Vbool e)
+	| Var e -> lookup_env env e;;
 
 
 let exp0 : expr = Num 10;;
+let exp2 : expr = Var "y";;
 
 
 let exp1 : expr = If(Bool true, Num 10, Num 12);;
-let bigstep : value option = eval environment exp0;;
+let bigstep : value option = eval environment exp2;;
