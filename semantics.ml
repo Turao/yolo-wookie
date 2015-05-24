@@ -56,9 +56,11 @@ let update_env (env:env) (x:variable) (v: value) : env =
 	(x , v)::env 
 
 
+(* exceptions *)
+(* exception BadSyntax_If of string;; *)
 
 
-(*---------------------TESTS----------------------*)	
+(*---------------------TESTS----------------------*)
 
 
 let x : value = Vnum 10;;
@@ -77,15 +79,20 @@ env1;;
 
 
 let rec eval (env: env) (e: expr) : value option =
-	match e with	
+	match e with
 	| Num e -> Some (Vnum e)
 	| Bool e -> Some (Vbool e)
-	| Var e -> lookup_env env e;;
+	| Var e -> lookup_env env e
+	| If (e1, e2, e3) -> 
+		match eval env e1 with
+		| Some (Vbool true) -> eval env e2
+		| Some (Vbool false) -> eval env e3;;
 
 
 let exp0 : expr = Num 10;;
 let exp2 : expr = Var "y";;
 
 
-let exp1 : expr = If(Bool true, Num 10, Num 12);;
-let bigstep : value option = eval environment exp2;;
+let exp1 : expr = If(Bool false, Num 10, Num 12);;
+
+let bigstep : value option = eval environment exp1;;
