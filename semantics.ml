@@ -64,16 +64,26 @@ let update_env (env:env) (x:variable) (v: value) : env =
 let x : value = Vnum 10;;
 let y : value = Vnum 12;;
 let z : value = Vnum 9;;
+let w : value = Vbool true;;
 let k : value = Vbool true;;
 
-let environment : env = [ ("y", y);("x", x);("z", z) ];;
+let environment : env = [ ("y", y);("x", x);("z", z); ("w", w) ];;
 let env1 = update_env environment "karakarambakarakarao" k
 
-let result = lookup_env environment "z";;
+let result = lookup_env environment "w";;
 
 env1;;
 
 
 
-(*
-let rec eval (env: env) (e: expr) : value option = failwith ”unimplemented”*)
+let rec eval (env: env) (e: expr) : value option =
+	match e with	
+	| Num e -> Some (Vnum e);;
+	
+
+
+let exp0 : expr = Num 10;;
+
+
+let exp1 : expr = If(Bool true, Num 10, Num 12);;
+let bigstep : value option = eval environment exp0;;
