@@ -36,6 +36,9 @@ exception CantEvaluateIf of string;;
 
 (* helpers *)
 exception CantGetValueFromNone of string
+
+(* usado para que devolva o valor referente a um valor opcional, podendo agora ser calculado pelas
+operações binarias *)
 let get (x: value option) : value =
 	match x with
 	| None -> raise (CantGetValueFromNone "Could not retrieve value from None") 
@@ -158,14 +161,17 @@ let rec eval (env: env) (e: expr) : value option =
 		| Some (Vbool false) -> eval env e3 
 		| _ -> raise (CantEvaluateIf "Bad Syntax") )
 	| Bop (e1, op, e2) ->
+	(* evaluates both expressions and then operates*)
+		let v1 = get(eval env e1) in
+		let v2 = get(eval env e2) in
 		(match op with
-		| Sum ->  Some ( sum (get(eval env e1)) (get (eval env e2)) )
-		| Diff ->  Some ( diff (get(eval env e1)) (get (eval env e2)) )
-		| Mult ->  Some ( mult (get(eval env e1)) (get (eval env e2)) )
-		| Div ->  Some ( div (get(eval env e1)) (get (eval env e2)) )
-		| Eq ->  Some ( eq (get(eval env e1)) (get (eval env e2)) )
-		| Leq ->  Some ( leq (get(eval env e1)) (get (eval env e2)) )
-		| _ -> None
+			| Sum ->  Some ( sum v1 v2 )
+			| Diff ->  Some ( diff v1 v2 )
+			| Mult ->  Some ( mult v1 v2 )
+			| Div ->  Some ( div v1 v2 )
+			| Eq ->  Some ( eq v1 v2 )
+			| Leq ->  Some ( leq v1 v2 )
+			| _ -> None;
 		)
 	| _ -> None;;
 
@@ -183,12 +189,13 @@ let rec eval (env: env) (e: expr) : value option =
 
 (*---------------------TESTS----------------------*)
 
-
+(* values *)
 let x : value = Vnum 10;;
 let y : value = Vnum 12;;
 let z : value = Vnum 9;;
 let w : value = Vbool true;;
 let k : value = Vbool true;;
+
 
 let environment : env = [ ("y", y);("x", x);("z", z); ("w", w) ];;
 let env1 = update_env environment "karakarambakarakarao" k
@@ -196,17 +203,19 @@ let env1 = update_env environment "karakarambakarakarao" k
 let result = lookup_env environment "w";;
 
 
-
+(* expressions *)
 let exp0 : expr = Num 10;;
 let exp1 : expr = Num 3;;
 let exp2 : expr = Var "y";;
 
 let exp3 : expr = If(Bool true, Bool false, Bool true);;
 let exp4 : expr = If(exp0, Num 10, Num 12);;
-let exp5 : expr = Bop (exp0, Sum, exp1);;
+let exp5 : expr = Bop (exp0, Leq, exp1);;
 
+(* environments *)
 let env2 = update_env environment "y" (Vbool false);;
 let env3 = update_env environment "y" (Vnum 999);;
 let env4 = update_env environment "y" (Vnum 999);;
 
+(* big step evaluation *)
 let bigstep : value option = eval environment exp5;;
