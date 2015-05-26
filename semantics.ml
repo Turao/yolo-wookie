@@ -123,6 +123,17 @@ let rec lookup_env (env:env) (x:variable) : value option =
 		else 
 			lookup_env tl x;; 
 
+(* remove the first occurence of a variable from an environment *)
+let rec removeVariableFromEnvironment (env:env) (x:variable) : env = 
+	match env with
+	| [] -> []
+	| (var, value) :: tl ->
+		if compare var x == 0 then 
+			tl
+		else
+			(var, value) :: (removeVariableFromEnvironment tl x);; 
+
+
 
 let rec update_value (env:env) (x:variable) (v:value) : env =
 	match env with
@@ -136,6 +147,7 @@ let rec update_value (env:env) (x:variable) (v:value) : env =
 
 (* atualização do ambiente :
 update env x v retorna um novo env contendo o par (x,v) *)
+(*
 let update_env (env:env) (x:variable) (v: value) : env = 
 	match lookup_env env x with
 	| None -> (x, v)::env
@@ -146,6 +158,11 @@ let update_env (env:env) (x:variable) (v: value) : env =
 			(update_value env x v)
 		else
 			env;; 
+*)
+
+let update_env (env:env) (x:variable) (v: value) : env =
+	(x,v)::env
+
 (* ================================================================ *)	
 
 
@@ -174,6 +191,7 @@ let rec eval (env: env) (e: expr) : value option =
 			| Leq ->  Some ( leq v1 v2 )
 			| _ -> None;
 		)
+
 	| Lam (var, e1) ->
 	(* se pa precisa verificar se a variavel eh valida aqui, ou seja, se existe no env *)
 		Some (Vclos (var, e1, env))
@@ -212,6 +230,7 @@ let rec eval (env: env) (e: expr) : value option =
 		(* and evaluates the expression e2 *)
 		in eval updated_env e2
 		
+
 	| _ -> None;;
 
 (* ================================================================ *)
@@ -258,5 +277,16 @@ let env3 = update_env environment "y" (Vnum 999);;
 let env4 = update_env environment "y" (Vnum 999);;
 let env5 = update_env environment "z" (Vnum 177);;
 
+
+
 (* big step evaluation *)
 let bigstep : value option = eval environment exp12;;
+
+let envTest : env = [];;
+let secondEnv = update_env envTest "kk" (Vnum 66);;
+secondEnv;;
+
+let envso = removeVariableFromEnvironment environment "z";;
+envso;;
+
+
