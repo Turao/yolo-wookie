@@ -120,11 +120,30 @@ let rec lookup_env (env:env) (x:variable) : value option =
 		else 
 			lookup_env tl x;; 
 
+let rec remove (env:env) (x:variable) : env =
+	match env with
+	| [] -> []
+	| (var, value) :: tl -> 
+		if compare var x == 0 then
+			tl
+		else
+			remove tl x;;
+
 
 (* atualização do ambiente :
 update env x v retorna um novo env contendo o par (x,v) *)
 let update_env (env:env) (x:variable) (v: value) : env = 
-	(x , v)::env 
+	match lookup_env env x with
+	| None -> (x, v)::env
+	| Some value -> 
+	(* if the variable is found in the environment, checks if
+	there is a need to change its value *)
+		if value != v then 
+			(x, v)::(remove env x)
+		else
+			env;; 
+	
+
 
 
 (* Big step expression *)
@@ -146,10 +165,20 @@ let rec eval (env: env) (e: expr) : value option =
 		| Div ->  Some ( div (get(eval env e1)) (get (eval env e2)) )
 		| Eq ->  Some ( eq (get(eval env e1)) (get (eval env e2)) )
 		| Leq ->  Some ( leq (get(eval env e1)) (get (eval env e2)) )
-		| _ -> None;
+		| _ -> None
 		)
 	| _ -> None;;
 
+
+(* | App (e1, e2) -> 
+		(match eval env e1 with
+		| Vclos (var, exp, env) -> None )
+		(match eval env e2 with
+		| Vnum v -> v
+		| Vbool v -> v
+		| Vclos (var, exp, env)) *)
+
+	
 
 
 (*---------------------TESTS----------------------*)
@@ -166,8 +195,6 @@ let env1 = update_env environment "karakarambakarakarao" k
 
 let result = lookup_env environment "w";;
 
-env1;;
-
 
 
 let exp0 : expr = Num 10;;
@@ -177,5 +204,9 @@ let exp2 : expr = Var "y";;
 let exp3 : expr = If(Bool true, Bool false, Bool true);;
 let exp4 : expr = If(exp0, Num 10, Num 12);;
 let exp5 : expr = Bop (exp0, Sum, exp1);;
+
+let env2 = update_env environment "y" (Vbool false);;
+let env3 = update_env environment "y" (Vnum 999);;
+let env4 = update_env environment "y" (Vnum 999);;
 
 let bigstep : value option = eval environment exp5;;
