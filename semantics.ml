@@ -173,7 +173,11 @@ let rec eval (env: env) (e: expr) : value option =
 			| Leq ->  Some ( leq v1 v2 )
 			| _ -> None;
 		)
-	| _ -> None;;
+	| _ -> None
+
+	| Lam (var, e1) ->
+	(* se pa precisa verificar se a variavel eh valida aqui, ou seja, se existe no env *)
+		Some (Vclos (var, e1, env));;
 
 
 (* | App (e1, e2) -> 
@@ -219,3 +223,4 @@ let env4 = update_env environment "y" (Vnum 999);;
 
 (* big step evaluation *)
 let bigstep : value option = eval environment exp5;;
+let lamtest : expr = Lam("Juca", exp0);;
