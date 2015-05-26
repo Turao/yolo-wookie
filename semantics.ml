@@ -36,6 +36,9 @@ exception CantEvaluateIf of string;;
 
 (* helpers *)
 exception CantGetValueFromNone of string
+
+(* usado para que devolva o valor referente a um valor opcional, podendo agora ser calculado pelas
+operações binarias *)
 let get (x: value option) : value =
 	match x with
 	| None -> raise (CantGetValueFromNone "Could not retrieve value from None") 
@@ -139,13 +142,16 @@ let rec eval (env: env) (e: expr) : value option =
 		| Some (Vbool false) -> eval env e3 
 		| _ -> raise (CantEvaluateIf "Bad Syntax") )
 	| Bop (e1, op, e2) ->
+	(*pega o valor da expressao e passa para v1 e v2 respectivamente*)
+		let v1 = get(eval env e1) in
+		let v2 = get(eval env e2) in
 		(match op with
-		| Sum ->  Some ( sum (get(eval env e1)) (get (eval env e2)) )
-		| Diff ->  Some ( diff (get(eval env e1)) (get (eval env e2)) )
-		| Mult ->  Some ( mult (get(eval env e1)) (get (eval env e2)) )
-		| Div ->  Some ( div (get(eval env e1)) (get (eval env e2)) )
-		| Eq ->  Some ( eq (get(eval env e1)) (get (eval env e2)) )
-		| Leq ->  Some ( leq (get(eval env e1)) (get (eval env e2)) )
+		| Sum ->  Some ( sum v1 v2 )
+		| Diff ->  Some ( diff v1 v2 )
+		| Mult ->  Some ( mult v1 v2 )
+		| Div ->  Some ( div v1 v2 )
+		| Eq ->  Some ( eq v1 v2 )
+		| Leq ->  Some ( leq v1 v2 )
 		| _ -> None;
 		)
 	| _ -> None;;
@@ -176,6 +182,7 @@ let exp2 : expr = Var "y";;
 
 let exp3 : expr = If(Bool true, Bool false, Bool true);;
 let exp4 : expr = If(exp0, Num 10, Num 12);;
-let exp5 : expr = Bop (exp0, Sum, exp1);;
-
+let exp5 : expr = Bop (exp0, Leq, exp1);;
+exp5;;
+exp3;;
 let bigstep : value option = eval environment exp5;;
