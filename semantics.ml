@@ -123,14 +123,15 @@ let rec lookup_env (env:env) (x:variable) : value option =
 		else 
 			lookup_env tl x;; 
 
-let rec remove (env:env) (x:variable) : env =
+
+let rec update_value (env:env) (x:variable) (v:value) : env =
 	match env with
 	| [] -> []
 	| (var, value) :: tl -> 
 		if compare var x == 0 then
-			tl
+			(var, v)::tl
 		else
-			remove tl x;;
+			(var, value) :: (update_value tl x v);;
 
 
 (* atualização do ambiente :
@@ -142,10 +143,10 @@ let update_env (env:env) (x:variable) (v: value) : env =
 	(* if the variable is found in the environment, checks if
 	there is a need to change its value *)
 		if value != v then 
-			(x, v)::(remove env x)
+			(update_value env x v)
 		else
 			env;; 
-	
+(* ================================================================ *)	
 
 
 
@@ -173,19 +174,40 @@ let rec eval (env: env) (e: expr) : value option =
 			| Leq ->  Some ( leq v1 v2 )
 			| _ -> None;
 		)
-
-
 	| Lam (var, e1) ->
 	(* se pa precisa verificar se a variavel eh valida aqui, ou seja, se existe no env *)
 		Some (Vclos (var, e1, env))
 
 
-	| App (e1, e2) -> lookup_env
+	| App (e1, e2) -> 
+		(* updates e1's environment with the value in e2 *)
+		let updated_env : env =
+			(* updated environment *)
+			(update_env
+				(* environment *)
+				(match eval env e1 with
+				| Some (Vclos (var, exp, env')) -> env' )
+				(* variable *)
+				(match eval env e1 with
+				| Some (Vclos (var, exp, env)) -> var )
+				(* value' *)
+				(match eval env e2 with
+				| Some v -> v))
+		in
+		(* and evaluates the expression e1 *)
+		(match e1 with
+		| Lam (var, exp) -> eval updated_env exp
+		| _ -> eval updated_env e1)
+
+		(* just some code, do not use it until things
+		start to go wrong *)
+
+	(* lookup_env
 		(* updated environment *)
 		(update_env
 			(* environment *)
 			(match eval env e1 with
-			| Some (Vclos (var, exp, env)) -> env )
+			| Some (Vclos (var, exp, env')) -> env' )
 			(* variable *)
 			(match eval env e1 with
 			| Some (Vclos (var, exp, env)) -> var )
@@ -194,10 +216,11 @@ let rec eval (env: env) (e: expr) : value option =
 			| Some v -> v))
 		(* variable *)
 		(match eval env e1 with
-		| Some (Vclos (var, exp, env)) -> var )
+		| Some (Vclos (var, exp, env)) -> var ) *)
 	| _ -> None;;
-		
-	
+
+(* ================================================================ *)
+
 
 
 (*---------------------TESTS----------------------*)
@@ -224,12 +247,16 @@ let exp2 : expr = Var "y";;
 let exp3 : expr = If(Bool true, Bool false, Bool true);;
 let exp4 : expr = If(exp0, Num 10, Num 12);;
 let exp5 : expr = Bop (exp0, Leq, exp1);;
-let exp6 : expr = App ;;
+let exp6 : expr = Lam ("w", exp0);;
+let exp7 : expr = Bop (Var "y", Sum, Var "z")
+let exp8 : expr = Lam ("z", exp7)
+let exp9 : expr = App (exp8, exp0);;
+
 (* environments *)
 let env2 = update_env environment "y" (Vbool false);;
 let env3 = update_env environment "y" (Vnum 999);;
 let env4 = update_env environment "y" (Vnum 999);;
+let env5 = update_env environment "z" (Vnum 177);;
 
 (* big step evaluation *)
-let bigstep : value option = eval environment exp5;;
-let lamtest : expr = Lam("Juca", exp0);;
+let bigstep : value option = eval environment exp9;;
