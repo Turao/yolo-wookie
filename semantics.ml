@@ -173,21 +173,30 @@ let rec eval (env: env) (e: expr) : value option =
 			| Leq ->  Some ( leq v1 v2 )
 			| _ -> None;
 		)
-	| _ -> None
+
 
 	| Lam (var, e1) ->
 	(* se pa precisa verificar se a variavel eh valida aqui, ou seja, se existe no env *)
-		Some (Vclos (var, e1, env));;
+		Some (Vclos (var, e1, env))
 
 
-(* | App (e1, e2) -> 
+	| App (e1, e2) -> lookup_env
+		(* updated environment *)
+		(update_env
+			(* environment *)
+			(match eval env e1 with
+			| Some (Vclos (var, exp, env)) -> env )
+			(* variable *)
+			(match eval env e1 with
+			| Some (Vclos (var, exp, env)) -> var )
+			(* value' *)
+			(match eval env e2 with
+			| Some v -> v))
+		(* variable *)
 		(match eval env e1 with
-		| Vclos (var, exp, env) -> None )
-		(match eval env e2 with
-		| Vnum v -> v
-		| Vbool v -> v
-		| Vclos (var, exp, env)) *)
-
+		| Some (Vclos (var, exp, env)) -> var )
+	| _ -> None;;
+		
 	
 
 
@@ -215,7 +224,7 @@ let exp2 : expr = Var "y";;
 let exp3 : expr = If(Bool true, Bool false, Bool true);;
 let exp4 : expr = If(exp0, Num 10, Num 12);;
 let exp5 : expr = Bop (exp0, Leq, exp1);;
-
+let exp6 : expr = App ;;
 (* environments *)
 let env2 = update_env environment "y" (Vbool false);;
 let env3 = update_env environment "y" (Vnum 999);;
