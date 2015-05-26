@@ -212,6 +212,27 @@ let rec eval (env: env) (e: expr) : value option =
 		(* and evaluates the expression e2 *)
 		in eval updated_env e2
 		
+	| Lrec (var, e1, e2) ->
+
+		let updated_env_with_f : env = 
+		(update_env
+				(* environment *)
+				env
+				(* variable *)
+				var
+				(* value' *)
+				(* fn x => e1 || <x, e1, env>*)
+				Lam (var, e1))
+		in
+		(update_env
+			(* environment *)
+			updated_env_with_f
+			(* variable *)
+			var
+			(* value' *)
+			v' (* o q é o v'? *)
+
+
 	| _ -> None;;
 
 (* ================================================================ *)
