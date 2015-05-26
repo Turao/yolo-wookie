@@ -199,24 +199,19 @@ let rec eval (env: env) (e: expr) : value option =
 		| Lam (var, exp) -> eval updated_env exp
 		| _ -> eval updated_env e1)
 
-		(* just some code, do not use it until things
-		start to go wrong *)
-
-	(* lookup_env
-		(* updated environment *)
-		(update_env
-			(* environment *)
-			(match eval env e1 with
-			| Some (Vclos (var, exp, env')) -> env' )
-			(* variable *)
-			(match eval env e1 with
-			| Some (Vclos (var, exp, env)) -> var )
-			(* value' *)
-			(match eval env e2 with
-			| Some v -> v))
-		(* variable *)
-		(match eval env e1 with
-		| Some (Vclos (var, exp, env)) -> var ) *)
+	| Let (var, e1, e2) -> 
+		let updated_env : env =
+			(update_env
+				(* environment *)
+				env
+				(* variable *)
+				var
+				(* value' *)
+				(match eval env e1 with
+				| Some v -> v))
+		(* and evaluates the expression e2 *)
+		in eval updated_env e2
+		
 	| _ -> None;;
 
 (* ================================================================ *)
@@ -246,11 +241,16 @@ let exp2 : expr = Var "y";;
 
 let exp3 : expr = If(Bool true, Bool false, Bool true);;
 let exp4 : expr = If(exp0, Num 10, Num 12);;
-let exp5 : expr = Bop (exp0, Leq, exp1);;
+let exp5 : expr = Bop (exp0, Sum, exp1);;
 let exp6 : expr = Lam ("w", exp0);;
 let exp7 : expr = Bop (Var "y", Sum, Var "z")
 let exp8 : expr = Lam ("z", exp7)
-let exp9 : expr = App (exp8, exp0);;
+let exp9 : expr = App (exp8, exp1);;
+
+let exp10 : expr = Bop (Num 31, Sum, Num 33);;
+let exp11 : expr = Bop (Var "f", Div, Num 8);;
+let exp12 : expr = Let ("f", exp10, exp11);;
+
 
 (* environments *)
 let env2 = update_env environment "y" (Vbool false);;
@@ -259,4 +259,4 @@ let env4 = update_env environment "y" (Vnum 999);;
 let env5 = update_env environment "z" (Vnum 177);;
 
 (* big step evaluation *)
-let bigstep : value option = eval environment exp9;;
+let bigstep : value option = eval environment exp12;;
