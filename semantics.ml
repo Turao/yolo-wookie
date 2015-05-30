@@ -17,11 +17,11 @@ type expr =
 			| If of expr * expr * expr | Var of variable
 			| App of expr * expr
 			| Lam of variable * expr | Let of variable * expr * expr
-			| Lrec of variable * expr * expr
+			| Lrec of variable * variable * expr * expr
 
 
 type value =
-	| Vnum of int | Vbool of bool | Vclos of variable * expr * env
+	| Vnum of int | Vbool of bool | Vclos of variable * expr * env | Vrclos of variable * variable * expr * env
 and
 	env = ( variable * value ) list
 (* ================================================================ *)
@@ -229,7 +229,10 @@ let rec eval (env: env) (e: expr) : value option =
 				| Some v -> v))
 		(* and evaluates the expression e2 *)
 		in eval updated_env e2
-		
+	
+	| Lrec (f, x, e1, e2) -> let closure = Vrclos(f, x, e1, env) in
+          (eval (update_env env f closure) e2)
+
 
 	| _ -> None;;
 
@@ -245,9 +248,9 @@ let y : value = Vnum 12;;
 let z : value = Vnum 9;;
 let w : value = Vbool true;;
 let k : value = Vbool true;;
+let re : value = Vnum 1;;
 
-
-let environment : env = [ ("y", y);("x", x);("z", z); ("w", w) ];;
+let environment : env = [ ("y", y);("x", x);("z", z); ("w", w); ("rec", re)  ];;
 let env1 = update_env environment "karakarambakarakarao" k
 
 let result = lookup_env environment "w";;
@@ -290,3 +293,14 @@ let envso = removeVariableFromEnvironment environment "z";;
 envso;;
 
 
+
+(* REC MANOLAGE *)
+
+let recTextBop = Bop(Var("x"), Eq, Num(1));;
+let recTestTrue = Num(1);;
+let recTextFalse = Bop(Var("x"), Mult,App(Var("f"), Bop(Var("x"), Diff, Num(1))));;
+let varFunc = Var("f");;
+
+let rec fnrec = (Lrec("f", "x", If(recTextBop, fnrec, recTextFalse), varFunc));;
+
+fnrec;;
