@@ -196,7 +196,28 @@ let rec eval (env: env) (e: expr) : value option =
 	(* se pa precisa verificar se a variavel eh valida aqui, ou seja, se existe no env *)
 		Some (Vclos (var, e1, env))
 
-
+	
+    | App (e1, e2) ->
+    	let e1'= eval env e1 in
+    	(match e1' with
+    	| Some ( Vclos (var, exp, env')) -> 
+    		(let e2' = eval env e2 in
+    			( match e2' with
+    				Some v -> 
+    					let updated_env : env = (update_env env' var v) in
+    					eval updated_env exp
+    			)
+    		)
+    	| Some (Vrclos(f, x, e, env')) -> 
+    		(let e2' = eval env e2 in
+    			( match e2' with 
+    				Some v ->
+    					let updated_env : env = (update_env (update_env env' x v) f (Vrclos(f, x, e, env'))) in
+    					eval updated_env e
+    			)
+    		)
+    	)
+(*
 	| App (e1, e2) -> 
 		(* updates e1's environment with the value in e2 *)
 		let updated_env : env =
@@ -205,6 +226,7 @@ let rec eval (env: env) (e: expr) : value option =
 				(* environment *)
 				(match eval env e1 with
 				| Some (Vclos (var, exp, env')) -> env' )
+				| Some (Vrclos (f, var, exp, env')) -> env') 
 				(* variable *)
 				(match eval env e1 with
 				| Some (Vclos (var, exp, env)) -> var )
@@ -216,7 +238,7 @@ let rec eval (env: env) (e: expr) : value option =
 		(match e1 with
 		| Lam (var, exp) -> eval updated_env exp
 		| _ -> eval updated_env e1)
-
+*)
 	| Let (var, e1, e2) -> 
 		let updated_env : env =
 			(update_env
