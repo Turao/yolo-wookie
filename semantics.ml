@@ -35,7 +35,10 @@ exception CantEvaluateIf of string;;
 
 
 (* helpers *)
-exception CantGetValueFromNone of string
+exception CantGetValueFromNone of string ;;
+
+exception CantGetValue;;
+exception CantEvaluate;;
 
 (* usado para que devolva o valor referente a um valor opcional, podendo agora ser calculado pelas
 operações binarias *)
@@ -50,55 +53,67 @@ let get (x: value option) : value =
 let sum (a: value) (b: value) : value =
 	Vnum (
 		(match a with
-		| Vnum (x) -> x)
+		| Vnum (x) -> x
+		| _ -> raise CantGetValue )
 		+
 		(match b with
-		| Vnum (y) -> y)
+		| Vnum (y) -> y
+		| _ -> raise CantGetValue )
 	);;
 
 let diff (a: value) (b: value) : value =
 	Vnum (
 		(match a with
-		| Vnum (x) -> x)
+		| Vnum (x) -> x
+		| _ -> raise CantGetValue )
 		-
 		(match b with
-		| Vnum (y) -> y)
+		| Vnum (y) -> y
+		| _ -> raise CantGetValue )
 	);;
 
 let mult (a: value) (b: value) : value =
 	Vnum (
 		(match a with
-		| Vnum (x) -> x)
+		| Vnum (x) -> x
+		| _ -> raise CantGetValue )
 		*
 		(match b with
-		| Vnum (y) -> y)
+		| Vnum (y) -> y
+		| _ -> raise CantGetValue )
 	);;
 	
 let div (a: value) (b: value) : value =
 	Vnum (
 		(match a with
-		| Vnum (x) -> x)
+		| Vnum (x) -> x
+		| _ -> raise CantGetValue )
 		/
 		(match b with
-		| Vnum (y) -> y)
+		| Vnum (y) -> y
+		| _ -> raise CantGetValue )
 	);;
 	
 let eq (a: value) (b: value) : value =
 	Vbool (
 		(match a with
-		| Vnum (x) -> x)
+		| Vnum (x) -> x
+		| _ -> raise CantGetValue )
 		==
 		(match b with
-		| Vnum (y) -> y)
+		| Vnum (y) -> y
+		| _ -> raise CantGetValue )
 	);;
 
 let leq (a: value) (b: value) : value =
 	Vbool (
 		(match a with
-		| Vnum (x) -> x)
+		| Vnum (x) -> x
+		| _ -> raise CantGetValue )
 		<=
 		(match b with
-		| Vnum (y) -> y)
+		| Vnum (y) -> y  
+		| _ -> raise CantGetValue )
 	);;
 (* ================================================================ *)
 
@@ -203,20 +218,24 @@ let rec eval (env: env) (e: expr) : value option =
     	| Some ( Vclos (var, exp, env')) -> 
     		(let e2' = eval env e2 in
     			( match e2' with
-    				Some v -> 
+    				| Some v -> 
     					let updated_env : env = (update_env env' var v) in
     					eval updated_env exp
+    				| _ -> raise CantEvaluate
     			)
     		)
     	| Some (Vrclos(f, x, e, env')) -> 
     		(let e2' = eval env e2 in
     			( match e2' with 
-    				Some v ->
+    				| Some v ->
     					let updated_env : env = (update_env (update_env env' x v) f (Vrclos(f, x, e, env'))) in
     					eval updated_env e
+    				| _ -> raise CantEvaluate
     			)
     		)
+    	| _ -> None
     	)
+
 (*
 	| App (e1, e2) -> 
 		(* updates e1's environment with the value in e2 *)
@@ -248,13 +267,15 @@ let rec eval (env: env) (e: expr) : value option =
 				var
 				(* value' *)
 				(match eval env e1 with
-				| Some v -> v))
+				| Some v -> v
+				| _ -> raise CantEvaluate
+				)
+			)
 		(* and evaluates the expression e2 *)
 		in eval updated_env e2
 	
 	| Lrec (f, x, e1, e2) -> let closure = Vrclos(f, x, e1, env) in
           (eval (update_env env f closure) e2)
-
 
 	| _ -> None;;
 
