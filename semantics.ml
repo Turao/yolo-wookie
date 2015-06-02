@@ -37,8 +37,8 @@ exception CantEvaluateIf of string;;
 (* helpers *)
 exception CantGetValueFromNone of string ;;
 
-exception CantGetValue;;
-exception CantEvaluate;;
+exception CantGetValue of string;;
+exception CantEvaluate of string;;
 
 (* usado para que devolva o valor referente a um valor opcional, podendo agora ser calculado pelas
 operações binarias *)
@@ -54,66 +54,66 @@ let sum (a: value) (b: value) : value =
 	Vnum (
 		(match a with
 		| Vnum (x) -> x
-		| _ -> raise CantGetValue )
+		| _ -> raise (CantGetValue "Cant get value") )
 		+
 		(match b with
 		| Vnum (y) -> y
-		| _ -> raise CantGetValue )
+		| _ -> raise (CantGetValue "Cant get value") )
 	);;
 
 let diff (a: value) (b: value) : value =
 	Vnum (
 		(match a with
 		| Vnum (x) -> x
-		| _ -> raise CantGetValue )
+		| _ -> raise (CantGetValue "Cant get value") )
 		-
 		(match b with
 		| Vnum (y) -> y
-		| _ -> raise CantGetValue )
+		| _ -> raise (CantGetValue "Cant get value") )
 	);;
 
 let mult (a: value) (b: value) : value =
 	Vnum (
 		(match a with
 		| Vnum (x) -> x
-		| _ -> raise CantGetValue )
+		| _ -> raise (CantGetValue "Cant get value") )
 		*
 		(match b with
 		| Vnum (y) -> y
-		| _ -> raise CantGetValue )
+		| _ -> raise (CantGetValue "Cant get value") )
 	);;
 	
 let div (a: value) (b: value) : value =
 	Vnum (
 		(match a with
 		| Vnum (x) -> x
-		| _ -> raise CantGetValue )
+		| _ -> raise (CantGetValue "Cant get value") )
 		/
 		(match b with
 		| Vnum (y) -> y
-		| _ -> raise CantGetValue )
+		| _ -> raise (CantGetValue "Cant get value") )
 	);;
 	
 let eq (a: value) (b: value) : value =
 	Vbool (
 		(match a with
 		| Vnum (x) -> x
-		| _ -> raise CantGetValue )
+		| _ -> raise (CantGetValue "Cant get value") )
 		==
 		(match b with
 		| Vnum (y) -> y
-		| _ -> raise CantGetValue )
+		| _ -> raise (CantGetValue "Cant get value") )
 	);;
 
 let leq (a: value) (b: value) : value =
 	Vbool (
 		(match a with
 		| Vnum (x) -> x
-		| _ -> raise CantGetValue )
+		| _ -> raise (CantGetValue "Cant get value") )
 		<=
 		(match b with
 		| Vnum (y) -> y  
-		| _ -> raise CantGetValue )
+		| _ -> raise (CantGetValue "Cant get value") )
 	);;
 (* ================================================================ *)
 
@@ -221,7 +221,7 @@ let rec eval (env: env) (e: expr) : value option =
     				| Some v -> 
     					let updated_env : env = (update_env env' var v) in
     					eval updated_env exp
-    				| _ -> raise CantEvaluate
+    				| _ -> raise (CantEvaluate "Cant evaluate")
     			)
     		)
     	| Some (Vrclos(f, x, e, env')) -> 
@@ -230,7 +230,7 @@ let rec eval (env: env) (e: expr) : value option =
     				| Some v ->
     					let updated_env : env = (update_env (update_env env' x v) f (Vrclos(f, x, e, env'))) in
     					eval updated_env e
-    				| _ -> raise CantEvaluate
+    				| _ -> raise (CantEvaluate "Cant evaluate")
     			)
     		)
     	| _ -> None
@@ -268,7 +268,7 @@ let rec eval (env: env) (e: expr) : value option =
 				(* value' *)
 				(match eval env e1 with
 				| Some v -> v
-				| _ -> raise CantEvaluate
+				| _ -> raise (CantEvaluate "Cant evaluate")
 				)
 			)
 		(* and evaluates the expression e2 *)
