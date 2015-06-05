@@ -118,10 +118,6 @@ let leq (a: value) (b: value) : value =
 (* ================================================================ *)
 
 
-(* empties environment *)
-let empty env : env = [ ]
-
-
 (*
 	busca no ambiente :
 	
@@ -282,8 +278,77 @@ let rec eval (env: env) (e: expr) : value option =
 (* ================================================================ *)
 
 
+(* empties environment *)
+let empty env : env = [ ]
 
 (*---------------------TESTS----------------------*)
+
+(* ------------ environment tests ------------------*)
+
+print_endline("--------- ENVIRONMENT TESTS --------");;
+
+let test_env1 : env = [("var1", Vnum 1)];;
+let test_env2 : env = update_env test_env1 "var2" (Vnum 2) ;;
+let test_env3 : env = update_env test_env2 "var3" (Vbool true) ;;
+let test_env4 : env = update_env test_env3 "var4" (Vbool false) ;;
+let test_env5 : env = update_env test_env4 "var5" (Vnum 5) ;;
+
+lookup_env test_env5 "var2" ;;
+lookup_env test_env5 "var4" ;;
+
+(* ------------- Expressions and Variables ---------- *)
+
+print_endline("--------- EXPRESSIONS AND VARIABLES --------");;
+
+let a : value = Vnum 10;;
+let b : value = Vnum 12;;
+let c : value = Vnum 9;;
+let d : value = Vbool true;;
+let e : value = Vbool true;;
+let f : value = Vnum 1;;
+
+let expr1 : expr = Num 10;;
+let expr2 : expr = Num 20;;
+
+(* ------------ Var tests ------------------------ *)
+
+print_endline("--------- VAR TESTS --------");;
+
+let var1 : expr = Var "var1";;
+let varTrue : expr = Var "var3";;
+let varFalse : expr = Var "var4";;
+eval test_env5 var1;;
+eval test_env5 varTrue;;
+eval test_env5 varFalse;;
+
+(* ------------ Bop tests ------------------------ *)
+
+print_endline("--------- BOP TESTS --------");;
+
+let test_Bop1 : expr = Bop(expr1, Sum, expr2);;
+let test_Bop2 : expr = Bop(expr1, Diff, expr2);;
+let test_Bop3 : expr = Bop(expr2, Div, expr1);;
+let test_Bop4 : expr = Bop(expr1, Mult, expr2);;
+let test_Bop5 : expr = Bop(expr1, Eq, expr2);;
+let test_Bop6 : expr = Bop(expr1, Leq, expr2);;
+eval test_env5 test_Bop1;;
+eval test_env5 test_Bop2;;
+eval test_env5 test_Bop3;;
+eval test_env5 test_Bop4;;
+eval test_env5 test_Bop5;;
+eval test_env5 test_Bop6;;
+
+(* ------------ If tests ------------------------ *)
+
+print_endline("--------- IF TESTS --------");;
+
+let test_If1 : expr = If(varTrue, test_Bop1, test_Bop2);;
+let test_If2 : expr = If(varFalse, test_Bop1, test_Bop2);;
+eval test_env5 test_If1;;
+eval test_env5 test_If2;;
+
+
+(*
 
 (* values *)
 let x : value = Vnum 10;;
@@ -347,3 +412,4 @@ let varFunc = Var("f");;
 let rec fnrec = (Lrec("f", "x", If(recTextBop, fnrec, recTextFalse), varFunc));;
 
 fnrec;;
+*)
