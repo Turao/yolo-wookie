@@ -204,7 +204,6 @@ let rec eval (env: env) (e: expr) : value option =
 		)
 
 	| Lam (var, e1) ->
-	(* se pa precisa verificar se a variavel eh valida aqui, ou seja, se existe no env *)
 		Some (Vclos (var, e1, env))
 
 	
@@ -275,11 +274,11 @@ let rec eval (env: env) (e: expr) : value option =
 
 	| _ -> None;;
 
-(* ================================================================ *)
+(* ============================================================================================================= *)
 
 
 (* empties environment *)
-let empty env : env = [ ]
+let empty env : env = [ ];;
 
 (*---------------------TESTS----------------------*)
 
@@ -298,13 +297,13 @@ lookup_env test_env5 "var4" ;;
 
 (* ------------- Expressions and Variables ---------- *)
 
-print_endline("--------- EXPRESSIONS AND VARIABLES --------");;
+print_endline("--------- EXPRESSIONS AND VALUES --------");;
 
 let a : value = Vnum 10;;
 let b : value = Vnum 12;;
 let c : value = Vnum 9;;
 let d : value = Vbool true;;
-let e : value = Vbool true;;
+let e : value = Vbool false;;
 let f : value = Vnum 1;;
 
 let expr1 : expr = Num 10;;
@@ -346,6 +345,46 @@ let test_If1 : expr = If(varTrue, test_Bop1, test_Bop2);;
 let test_If2 : expr = If(varFalse, test_Bop1, test_Bop2);;
 eval test_env5 test_If1;;
 eval test_env5 test_If2;;
+
+(* ------------ Lam tests ------------------------ *)
+
+print_endline("--------- LAM TESTS --------");;
+
+let envWithClosures : env = [ ("a", a);("b", b);("c", c); ("d", d); ("e", e); ("f", f)   ];;
+
+let expression1 : expr = Bop (Var "a", Sum, Var "b");;
+let expression2 : expr = If (Var "e", Var "a", Bop (Var "a", Diff, Var "b") );;
+let test_Lam1 : expr = Lam ("z", expression1) ;;
+let test_Lam2 : expr = Lam ("k", expression2) ;;
+eval envWithClosures test_Lam1 ;;
+eval envWithClosures test_Lam2 ;;
+
+(* ------------ Let tests ------------------------ *)
+
+print_endline("--------- LET TESTS --------");;
+
+let exprLET1 : expr = Bop (Num 31, Sum, Num 33);;
+let exprLET2 : expr = Bop (Var "f", Div, Num 2);;
+let exprLET3 : expr = Let ("f", exprLET1, exprLET2);;
+
+eval envWithClosures exprLET3;;
+
+let exprLET4 : expr = Num 5;;
+let exprLET5 : expr = Bop (Var "g", Leq, Num 10);;
+let exprLET6 : expr = Let ("g", exprLET4, exprLET5);;
+
+eval envWithClosures exprLET6;;
+(*
+let envWithClosures env : env = [ ];;
+envWithClosures;;
+let valueTest_Bop1 = eval test_env5 test
+let exp8 : expr = Lam ("z", test_Bop1);;
+eval envWithClosures exp8;;
+
+let envWithClosuresd : env = update_env envWithClosures "closure" val8 ;;
+
+envWithClosuresd;;
+*)
 
 
 (*
