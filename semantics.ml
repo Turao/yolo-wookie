@@ -1,9 +1,12 @@
+
 (* Semântica Formal - Interpretador de L1 baseado em semântica
 	big step com ambientes
 
 Alunos:
 	Arthur Lenz
 	Rafael Valer *)
+
+
 
 (* Types *)
 type variable = string
@@ -199,8 +202,7 @@ let rec eval (env: env) (e: expr) : value option =
 			| Mult ->  Some ( mult v1 v2 )
 			| Div ->  Some ( div v1 v2 )
 			| Eq ->  Some ( eq v1 v2 )
-			| Leq ->  Some ( leq v1 v2 )
-			| _ -> None;
+			| Leq ->  Some ( leq v1 v2 );
 		)
 
 	| Lam (var, e1) ->
@@ -231,28 +233,6 @@ let rec eval (env: env) (e: expr) : value option =
     	| _ -> None
     	)
 
-(*
-	| App (e1, e2) -> 
-		(* updates e1's environment with the value in e2 *)
-		let updated_env : env =
-			(* updated environment *)
-			(update_env
-				(* environment *)
-				(match eval env e1 with
-				| Some (Vclos (var, exp, env')) -> env' )
-				| Some (Vrclos (f, var, exp, env')) -> env') 
-				(* variable *)
-				(match eval env e1 with
-				| Some (Vclos (var, exp, env)) -> var )
-				(* value' *)
-				(match eval env e2 with
-				| Some v -> v))
-		in
-		(* and evaluates the expression e1 *)
-		(match e1 with
-		| Lam (var, exp) -> eval updated_env exp
-		| _ -> eval updated_env e1)
-*)
 	| Let (var, e1, e2) -> 
 		let updated_env : env =
 			(update_env
@@ -272,7 +252,7 @@ let rec eval (env: env) (e: expr) : value option =
 	| Lrec (f, x, e1, e2) -> let closure = Vrclos(f, x, e1, env) in
           (eval (update_env env f closure) e2)
 
-	| _ -> None;;
+	;;
 
 (* ============================================================================================================= *)
 
@@ -374,74 +354,22 @@ let exprLET5 : expr = Bop (Var "g", Leq, Num 10);;
 let exprLET6 : expr = Let ("g", exprLET4, exprLET5);;
 
 eval envWithClosures exprLET6;;
-(*
-let envWithClosures env : env = [ ];;
-envWithClosures;;
-let valueTest_Bop1 = eval test_env5 test
-let exp8 : expr = Lam ("z", test_Bop1);;
-eval envWithClosures exp8;;
 
-let envWithClosuresd : env = update_env envWithClosures "closure" val8 ;;
+(* ------------ App tests ------------------------ *)
 
-envWithClosuresd;;
-*)
+print_endline("--------- APP TESTS --------");;
 
+let exprAPP1 : expr = Bop (Var "f", Sum, Num 10);;
+let exprAPP2 : expr = Num 6;; 
+let exprAPP3 : expr = Lam ("f", exprAPP1);;
+let exprAPP4 : expr = App (exprAPP3, exprAPP2);;
 
-(*
-
-(* values *)
-let x : value = Vnum 10;;
-let y : value = Vnum 12;;
-let z : value = Vnum 9;;
-let w : value = Vbool true;;
-let k : value = Vbool true;;
-let re : value = Vnum 1;;
-
-let environment : env = [ ("y", y);("x", x);("z", z); ("w", w); ("rec", re)  ];;
-let env1 = update_env environment "karakarambakarakarao" k
-
-let result = lookup_env environment "w";;
+eval envWithClosures exprAPP4;;
 
 
-(* expressions *)
-let exp0 : expr = Num 10;;
-let exp1 : expr = Num 3;;
-let exp2 : expr = Var "y";;
+(* ------------ Lrec tests ------------------------ *)
 
-let exp3 : expr = If(Bool true, Bool false, Bool true);;
-let exp4 : expr = If(exp0, Num 10, Num 12);;
-let exp5 : expr = Bop (exp0, Sum, exp1);;
-let exp6 : expr = Lam ("w", exp0);;
-let exp7 : expr = Bop (Var "y", Sum, Var "z")
-let exp8 : expr = Lam ("z", exp7)
-let exp9 : expr = App (exp8, exp1);;
-
-let exp10 : expr = Bop (Num 31, Sum, Num 33);;
-let exp11 : expr = Bop (Var "f", Div, Num 8);;
-let exp12 : expr = Let ("f", exp10, exp11);;
-
-
-(* environments *)
-let env2 = update_env environment "y" (Vbool false);;
-let env3 = update_env environment "y" (Vnum 999);;
-let env4 = update_env environment "y" (Vnum 999);;
-let env5 = update_env environment "z" (Vnum 177);;
-
-
-
-(* big step evaluation *)
-let bigstep : value option = eval environment exp12;;
-
-let envTest : env = [];;
-let secondEnv = update_env envTest "kk" (Vnum 66);;
-secondEnv;;
-
-let envso = removeVariableFromEnvironment environment "z";;
-envso;;
-
-
-*)
-(* REC MANOLAGE *)
+print_endline("--------- LREC TESTS --------");;
 
 let recTextBop = Bop(Var("x"), Eq, Num(1));;
 let recTestTrue = Num(1);;
@@ -449,7 +377,12 @@ let recTextFalse = Bop(Var("x"), Mult,App(Var("f"), Bop(Var("x"), Diff, Num(1)))
 let varFunc = Var("f");;
 
 let rec fnrec = (Lrec("f", "x", If(recTextBop, recTestTrue, recTextFalse), varFunc));;
-let fat10 = App (fnrec, Num 10);;
+let fat5 = App (fnrec, Num 5);;
 let lrec_env : env = [];; (* ("x", Vnum 1) *)
-eval lrec_env fat10;;
-(**)
+eval lrec_env fat5;;
+
+
+
+
+
+
