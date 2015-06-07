@@ -440,15 +440,16 @@ let envso = removeVariableFromEnvironment environment "z";;
 envso;;
 
 
-
+*)
 (* REC MANOLAGE *)
 
 let recTextBop = Bop(Var("x"), Eq, Num(1));;
 let recTestTrue = Num(1);;
-let recTextFalse = Bop(Var("x"), Mult,App(Var("f"), Bop(Var("x"), Diff, Num(1))));;
+let recTextFalse = Bop(Var("x"), Mult,App(Var("f"), Bop(Var("x"), Diff, Num(1))));; (* x*f(x-1) *)
 let varFunc = Var("f");;
 
-let rec fnrec = (Lrec("f", "x", If(recTextBop, fnrec, recTextFalse), varFunc));;
-
-fnrec;;
-*)
+let rec fnrec = (Lrec("f", "x", If(recTextBop, recTestTrue, recTextFalse), varFunc));;
+let fat10 = App (fnrec, Num 10);;
+let lrec_env : env = [];; (* ("x", Vnum 1) *)
+eval lrec_env fat10;;
+(**)
